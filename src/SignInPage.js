@@ -1,15 +1,18 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE } from "./config";
 
 export default function SignInPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailTouched, setEmailTouched] = useState(false);
   const [triedSubmit, setTriedSubmit] = useState(false);
-  const navigate = useNavigate();
-  //only allowed emails
-  const allowed = ["@columbia.edu", "@barnard.edu"];
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
+  const navigate = useNavigate();
+
+  const allowed = ["@columbia.edu", "@barnard.edu"];
   const hasAllowedDomain = (e) =>
     allowed.some((dom) => e.trim().toLowerCase().endsWith(dom));
 
@@ -20,18 +23,42 @@ export default function SignInPage() {
   const passwordValid = useMemo(() => password.length > 0, [password]);
   const formValid = emailValid && passwordValid;
 
-  // only show error after or submit attempt, and only if invalid
   const showEmailError =
     (emailTouched || triedSubmit) && email.length > 0 && !emailValid;
 
-  function handleSubmit(e) {
-    
+  async function handleSubmit(e) {
     e.preventDefault();
     setTriedSubmit(true);
     if (!formValid) return;
 
-    //api call here
-    navigate("/dashboard");
+    try {
+      setLoading(true);
+      setError("");
+
+      const res = await fetch(`${API_BASE}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.detail || data.message || `Login failed (${res.status})`);
+      }
+      if (!data.id_token) {
+        throw new Error("No token returned from server");
+      }
+
+      localStorage.setItem("authToken", data.id_token);
+      localStorage.setItem("userEmail", data.email);
+
+      // Show splash then dashboard
+      navigate(`/splash?mode=loginSuccess&next=${encodeURIComponent("/dashboard")}`);
+    } catch (err) {
+      setError(err.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -54,7 +81,7 @@ export default function SignInPage() {
         }}
       >
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-          {/* emial box */}
+          {/* Email */}
           <div style={{ display: "flex", alignItems: "center" }}>
             <label style={{ width: 110, fontWeight: 600, fontSize: ".95rem", color: "#444" }}>
               Email
@@ -73,21 +100,19 @@ export default function SignInPage() {
             />
           </div>
 
-          {/* error message */}
           {showEmailError && (
             <div
               role="alert"
               style={{
                 color: "#B00020", background: "#FDECEC", border: "1px solid #F5B7B1",
-                borderRadius: 6, padding: "8px 10px", fontSize: ".86rem",
-                marginTop: -8,
+                borderRadius: 6, padding: "8px 10px", fontSize: ".86rem", marginTop: -8,
               }}
             >
               Only @columbia.edu or @barnard.edu emails allowed. Please log in with your LionMail.
             </div>
           )}
 
-          {/* password  */}
+          {/* Password */}
           <div style={{ display: "flex", alignItems: "center" }}>
             <label style={{ width: 110, fontWeight: 600, fontSize: ".95rem", color: "#444" }}>
               Password
@@ -104,23 +129,33 @@ export default function SignInPage() {
             />
           </div>
 
-          {/* login button */}
+          {/* Error */}
+          {error && (
+            <div role="alert" style={{ color: "#B00020", fontSize: ".9rem" }}>
+              {error}
+            </div>
+          )}
+
+          {/* Login */}
           <button
             type="submit"
-            disabled={!formValid}
+            disabled={!formValid || loading}
             style={{
               marginTop: 6, width: "100%", padding: 12,
-              backgroundColor: formValid ? "#0072C6" : "#A7C2DD",
+              backgroundColor: formValid && !loading ? "#0072C6" : "#A7C2DD",
               color: "white", border: "none", borderRadius: 3,
               fontWeight: "bold", fontSize: ".95rem", textTransform: "uppercase",
-              cursor: formValid ? "pointer" : "not-allowed", opacity: formValid ? 1 : 0.9,
+              cursor: formValid && !loading ? "pointer" : "not-allowed",
+              opacity: formValid && !loading ? 1 : 0.9,
               transition: "background-color .2s ease",
             }}
-            onMouseOver={(e) => { if (formValid) e.target.style.backgroundColor = "#005999"; }}
-            onMouseOut={(e) => { if (formValid) e.target.style.backgroundColor = "#0072C6"; }}
           >
-            LOGIN
+            {loading ? "Logging in..." : "LOGIN"}
           </button>
+
+          <div style={{ fontSize: ".9rem", color: "#5A6A84", marginTop: 8 }}>
+            New here? <a href="/signup">Create an account</a>
+          </div>
         </form>
       </div>
     </div>

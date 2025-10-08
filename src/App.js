@@ -1,16 +1,29 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import SignupPage from "./SignUpPage";
 import SignInPage from "./SignInPage";
 import Dashboard from "./Dashboard";
+import Splash from "./Splash";
+import ProtectedRoute from "./ProtectedRoute";
 
-function App() {
+export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<SignInPage />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+        {/* default → /signup */}
+        <Route path="/" element={<Navigate to="/signup" replace />} />
+        <Route path="/signup" element={<SignupPage />} />
+        <Route path="/login" element={<SignInPage />} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/splash" element={<Splash />} />
+
       </Routes>
     </BrowserRouter>
   );
 }
-
-export default App;
