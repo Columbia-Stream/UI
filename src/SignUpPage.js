@@ -40,13 +40,13 @@ export default function SignupPage() {
           setLoading(true);
           setError("");
       
-          const res = await fetch(`${API_BASE}/signup`, {
+          const res = await fetch(`${API_BASE}/auth/signup`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               email,
               password,
-              role,   // always send role, ignored for now
+              //role,   // always send role, ignored for now
             }),
           });
       
