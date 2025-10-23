@@ -13,7 +13,7 @@ export default function Dashboard() {
         color: "#0E1B2A",
       }}
     >
-      {/* columbia stream bar */}
+      {/* ---------- Top Navigation Bar ---------- */}
       <header
         style={{
           position: "sticky",
@@ -42,35 +42,59 @@ export default function Dashboard() {
           >
             ColumbiaStream
           </div>
-          
 
           <div style={{ flex: 1 }} />
-        
-          <input
-            type="search"
-            placeholder="Search courses, professors, or lectures"
-            style={{
-              width: 360,
-              maxWidth: "45vw",
-              padding: "10px 12px",
-              border: "1px solid #DCE4EE",
-              borderRadius: 10,
-              outline: "none",
-              fontSize: ".95rem",
-              transition: "box-shadow .2s ease, border-color .2s ease",
-            }}
-            onFocus={(e) => {
-              e.currentTarget.style.borderColor = "#BFD9F2";
-              e.currentTarget.style.boxShadow =
-                "0 0 0 4px rgba(0,158,255,0.08)";
-            }}
-            onBlur={(e) => {
-              e.currentTarget.style.borderColor = "#DCE4EE";
-              e.currentTarget.style.boxShadow = "none";
-            }}
-          />
 
+          {/* Search Button */}
           <button
+            onClick={() => navigate("/search")}
+            style={{
+              background: "#009EFF",
+              border: "none",
+              color: "white",
+              padding: "9px 16px",
+              borderRadius: 10,
+              fontWeight: 600,
+              cursor: "pointer",
+              transition: "background-color .2s ease",
+            }}
+            onMouseOver={(e) =>
+              (e.currentTarget.style.backgroundColor = "#0080CC")
+            }
+            onMouseOut={(e) =>
+              (e.currentTarget.style.backgroundColor = "#009EFF")
+            }
+          >
+            Search
+          </button>
+
+          {/* Upload Button */}
+          <button
+            onClick={() => navigate("/upload")}
+            style={{
+              marginLeft: 12,
+              background: "#009EFF",
+              border: "none",
+              color: "white",
+              padding: "9px 16px",
+              borderRadius: 10,
+              fontWeight: 600,
+              cursor: "pointer",
+              transition: "background-color .2s ease",
+            }}
+            onMouseOver={(e) =>
+              (e.currentTarget.style.backgroundColor = "#0080CC")
+            }
+            onMouseOut={(e) =>
+              (e.currentTarget.style.backgroundColor = "#009EFF")
+            }
+          >
+            Upload
+          </button>
+
+          {/* Profile Button */}
+          <button
+            onClick={() => navigate("/profile")}
             style={{
               marginLeft: 12,
               background: "#F6F9FC",
@@ -79,6 +103,7 @@ export default function Dashboard() {
               padding: "8px 12px",
               borderRadius: 10,
               cursor: "pointer",
+              fontWeight: 500,
             }}
           >
             Profile
@@ -86,7 +111,7 @@ export default function Dashboard() {
         </div>
       </header>
 
-      
+      {/* Hero Section*/}
       <section
         style={{
           borderBottom: "1px solid #F2F5F9",
@@ -124,9 +149,15 @@ export default function Dashboard() {
         </div>
       </section>
 
-      {/* main bodyt */}
-      <main style={{ maxWidth: 1120, margin: "0 auto", padding: "28px 20px 56px" }}>
-        {/* browse section*/}
+      {/* Main Body */}
+      <main
+        style={{
+          maxWidth: 1120,
+          margin: "0 auto",
+          padding: "28px 20px 56px",
+        }}
+      >
+        {/* Browse Section */}
         <div
           style={{
             display: "grid",
@@ -139,19 +170,19 @@ export default function Dashboard() {
             title="Browse Courses"
             subtitle="Find lectures by course code or name."
             cta="courses"
-            onClick={() => alert("add route to /courses")}
+            onClick={() => navigate("/courses")}
             icon="📘"
           />
           <Card
             title="Browse Professors"
             subtitle="Browse lectures by professor name."
             cta="professors"
-            onClick={() => alert("add route to /professors")}
+            onClick={() => navigate("/professors")}
             icon="🎓"
           />
         </div>
 
-        {/* continue watching */}
+        {/* Continue Watching Section */}
         <SectionTitle>Continue Watching</SectionTitle>
 
         <div
@@ -170,8 +201,7 @@ export default function Dashboard() {
   );
 }
 
-
-
+/* ---------- Subcomponents ---------- */
 function SectionTitle({ children }) {
   return (
     <h2
@@ -238,8 +268,12 @@ function Card({ title, subtitle, cta, onClick, icon }) {
           whiteSpace: "nowrap",
           transition: "background-color .2s ease",
         }}
-        onMouseOver={(e) => (e.currentTarget.style.backgroundColor = "#0080CC")}
-        onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#009EFF")}
+        onMouseOver={(e) =>
+          (e.currentTarget.style.backgroundColor = "#0080CC")
+        }
+        onMouseOut={(e) =>
+          (e.currentTarget.style.backgroundColor = "#009EFF")
+        }
       >
         {cta}
       </button>
@@ -255,7 +289,8 @@ function VideoTile() {
         border: "1px solid #EDF2F7",
         borderRadius: 14,
         overflow: "hidden",
-        transition: "box-shadow .2s ease, transform .06s ease, border-color .2s ease",
+        transition:
+          "box-shadow .2s ease, transform .06s ease, border-color .2s ease",
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.boxShadow = "0 6px 24px rgba(20,40,70,0.06)";
@@ -268,7 +303,7 @@ function VideoTile() {
       onMouseDown={(e) => (e.currentTarget.style.transform = "scale(0.997)")}
       onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
     >
-      {/* video thumbnail will be here */}
+      {/* Video Thumbnail Placeholder */}
       <div
         style={{
           height: 132,
@@ -284,7 +319,7 @@ function VideoTile() {
         Video
       </div>
 
-      {/* random data for the video */}
+      {/* Video Info */}
       <div style={{ padding: 14 }}>
         <div
           style={{
@@ -295,7 +330,7 @@ function VideoTile() {
             color: "#13243A",
           }}
         >
-          COMS 4153 — Lecture  12
+          COMS 4153 — Lecture 12
         </div>
         <div style={{ color: "#5B6B82", fontSize: ".9rem" }}>
           Prof. Ferguson • 42 min

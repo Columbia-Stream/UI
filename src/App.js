@@ -3,6 +3,7 @@ import SignupPage from "./SignUpPage";
 import SignInPage from "./SignInPage";
 import Dashboard from "./Dashboard";
 import Splash from "./Splash";
+import SearchPage from "./SearchPage";
 import ProtectedRoute from "./ProtectedRoute";
 
 export default function App() {
@@ -22,7 +23,14 @@ export default function App() {
           }
         />
         <Route path="/splash" element={<Splash />} />
-
+        <Route
+          path="/search"
+          element={
+            <ProtectedRoute>
+              <SearchPage />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
