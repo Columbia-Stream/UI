@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { API_BASE } from "./config";
 
@@ -16,11 +16,8 @@ export default function SignInPage() {
   const hasAllowedDomain = (e) =>
     allowed.some((dom) => e.trim().toLowerCase().endsWith(dom));
 
-  const emailValid = useMemo(
-    () => email.length > 0 && hasAllowedDomain(email),
-    [email]
-  );
-  const passwordValid = useMemo(() => password.length > 0, [password]);
+  const emailValid = email.length > 0 && hasAllowedDomain(email);
+  const passwordValid = password.length > 0;
   const formValid = emailValid && passwordValid;
 
   const showEmailError =
@@ -45,15 +42,29 @@ export default function SignInPage() {
       if (!res.ok) {
         throw new Error(data.detail || data.message || `Login failed (${res.status})`);
       }
-      if (!data.id_token) {
+      const idToken = data.id_token || data.idToken;
+      if (!idToken) {
         throw new Error("No token returned from server");
       }
 
-      localStorage.setItem("authToken", data.id_token);
-      localStorage.setItem("userEmail", data.email);
+      const emailFromApi = data.email || data.user_email;
 
-      // Show splash then dashboard
-      navigate(`/splash?mode=loginSuccess&next=${encodeURIComponent("/dashboard")}`);
+      localStorage.setItem("authToken", idToken);
+      if (emailFromApi) {
+        localStorage.setItem("userEmail", emailFromApi);
+      }
+      if (data.role) {
+        localStorage.setItem("userRole", data.role);
+      }
+
+      const dashboardRoute =
+        data.dashboard_route || data.dashboardRoute || "/dashboard";
+      localStorage.setItem("dashboardRoute", dashboardRoute);
+
+      // Show splash then route-specific dashboard
+      navigate(
+        `/splash?mode=loginSuccess&next=${encodeURIComponent(dashboardRoute)}`
+      );
     } catch (err) {
       setError(err.message || "Something went wrong");
     } finally {

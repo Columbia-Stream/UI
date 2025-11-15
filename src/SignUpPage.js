@@ -5,7 +5,6 @@ import { API_BASE } from "./config";
 
 
 export default function SignupPage() {
-  const [uni, setUni] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("student"); // default
@@ -22,7 +21,6 @@ export default function SignupPage() {
   const emailValid =
     email.length > 0 && hasAllowedDomain(email);
   const passwordValid = password.length > 0;
-  const uniValid = uni.length > 0;
   const formValid = emailValid && passwordValid;
 
   const showEmailError =
@@ -46,7 +44,7 @@ export default function SignupPage() {
             body: JSON.stringify({
               email,
               password,
-              //role,   // always send role, ignored for now
+              role,
             }),
           });
       
@@ -94,17 +92,6 @@ export default function SignupPage() {
         }}
       >
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-          {/* UNI
-          <Row label="UNI">
-            <input
-              type="text"
-              placeholder="Enter your UNI"
-              value={uni}
-              onChange={(e) => setUni(e.target.value)}
-              style={inputStyle}
-            />
-          </Row> */}
-
           {/* Email */}
           <Row label="Email">
             <input
@@ -155,22 +142,51 @@ export default function SignupPage() {
             </select>
           </Row>
 
+          {/* Error */}
+          {error && (
+            <div
+              role="alert"
+              style={{
+                color: "#B00020",
+                fontSize: ".9rem",
+              }}
+            >
+              {error}
+            </div>
+          )}
+
           {/* Signup button */}
           <button
             type="submit"
-            disabled={!formValid}
+            disabled={!formValid || loading}
             style={{
-              marginTop: 6, width: "100%", padding: 12,
-              backgroundColor: formValid ? "#0072C6" : "#A7C2DD",
-              color: "white", border: "none", borderRadius: 3,
-              fontWeight: "bold", fontSize: ".95rem", textTransform: "uppercase",
-              cursor: formValid ? "pointer" : "not-allowed",
-              opacity: formValid ? 1 : 0.9,
+              marginTop: 6,
+              width: "100%",
+              padding: 12,
+              backgroundColor: formValid && !loading ? "#0072C6" : "#A7C2DD",
+              color: "white",
+              border: "none",
+              borderRadius: 3,
+              fontWeight: "bold",
+              fontSize: ".95rem",
+              textTransform: "uppercase",
+              cursor: formValid && !loading ? "pointer" : "not-allowed",
+              opacity: formValid && !loading ? 1 : 0.9,
               transition: "background-color .2s ease",
             }}
           >
-            SIGN UP
+            {loading ? "SIGNING UP..." : "SIGN UP"}
           </button>
+
+          <div
+            style={{
+              fontSize: ".9rem",
+              color: "#5A6A84",
+              marginTop: 8,
+            }}
+          >
+            Already a member? <a href="/login">Log in</a>
+          </div>
         </form>
       </div>
     </div>
