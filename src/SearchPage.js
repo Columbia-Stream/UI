@@ -1,14 +1,16 @@
 import { useState, useEffect } from "react";
 
-// TEMP: backend base for your FastAPI Search microservice
-const SEARCH_API_BASE = "http://127.0.0.1:8001/api";
+const SEARCH_API_BASE = "http://34.63.156.154:8081"; //composite microservice 
 
 export default function SearchPage() {
   // Local states for filters
   const [keyword, setKeyword] = useState("");
   const [courseId, setCourseId] = useState("");
   const [prof, setProf] = useState("");
-  const [results, setResults] = useState([]);
+
+  // IMPORTANT FIX → results is an OBJECT with items[]
+  const [results, setResults] = useState({ items: [] });
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -22,14 +24,26 @@ export default function SearchPage() {
     "Parijat Dube",
     "Richard Zemel",
   ];
+  
+  const PROFESSOR_MAP = {
+    "Donald Ferguson": "abc9",
+    "Nakul Verma": "def9",
+    "Ansaf Salleb-Aouissi": "ghi2",
+    "Daniel Bauer": "db12",
+    "Yunzhu Li": "yz56",
+    "Parijat Dube": "pjd22",
+    "Richard Zemel": "rzm88",
+  };
+
 
   const courseList = [
-    "COMS W4153",
-    "COMS W4774",
-    "COMS W4701",
-    "COMS E6998",
-    "COMS E4776",
+    "COMSW4153",
+    "COMSW4774",
+    "COMSW4761",
+    "COMSE6998",
+    "COMSE4776",
   ];
+
 
   async function handleSearch(e) {
     e.preventDefault();
@@ -38,23 +52,41 @@ export default function SearchPage() {
 
     try {
       const params = new URLSearchParams();
-      if (keyword) params.append("q", keyword);
-      if (courseId) params.append("course_id", courseId);
-      if (prof) params.append("prof", prof);
+
+      // ALWAYS allowed → keyword
+      if (keyword.trim() !== "") params.append("q", keyword.trim());
+
+      // if (courseId && courseList.includes(courseId)) {
+      //   params.append("course_id", courseId);
+      // }
+      if (courseId) {
+        params.append("course_id", courseId.trim());
+        console.log("courseId being sent =", courseId);
+      }
+
+      if (prof && professorList.includes(prof)) {
+        params.append("prof", PROFESSOR_MAP[prof]);
+      }
 
       const idToken = localStorage.getItem("authToken");
       if (!idToken) throw new Error("You must be logged in to search");
 
-      const res = await fetch(`${SEARCH_API_BASE}/search?${params.toString()}`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${idToken}`,
-        },
-      });
+      const res = await fetch(
+        `${SEARCH_API_BASE}/videos/search?${params.toString()}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${idToken}`,
+          },
+        }
+      );
 
       if (!res.ok) throw new Error("Failed to fetch search results");
+
+      // FIX → This is an object with items
       const data = await res.json();
       setResults(data);
+
     } catch (err) {
       setError(err.message);
     } finally {
@@ -66,7 +98,7 @@ export default function SearchPage() {
     setKeyword("");
     setCourseId("");
     setProf("");
-    setResults([]);
+    setResults({ items: [] });
   }
 
   return (
@@ -103,7 +135,6 @@ export default function SearchPage() {
           onSubmit={handleSearch}
           style={{ display: "flex", flexDirection: "column", gap: 18 }}
         >
-          {/* Keyword */}
           <FilterField
             label="Keyword"
             placeholder="Title or topic"
@@ -111,7 +142,6 @@ export default function SearchPage() {
             onChange={setKeyword}
           />
 
-          {/* Course ID Dropdown */}
           <CourseDropdown
             label="Course ID"
             placeholder="Type or select a course..."
@@ -120,7 +150,6 @@ export default function SearchPage() {
             courses={courseList}
           />
 
-          {/* Professor Dropdown */}
           <ProfessorDropdown
             label="Professor"
             placeholder="Type to search..."
@@ -165,7 +194,7 @@ export default function SearchPage() {
         </form>
       </aside>
 
-      {/*Right Results Panel*/}
+      {/* Right Results Panel */}
       <main style={{ padding: "32px 40px" }}>
         <h1 style={{ fontSize: "1.6rem", fontWeight: 700, marginBottom: 16 }}>
           Search Results
@@ -188,7 +217,7 @@ export default function SearchPage() {
 
         {loading && <p>Loading...</p>}
 
-        {!loading && results.length === 0 && (
+        {!loading && results.items?.length === 0 && (
           <p style={{ color: "#6B7280" }}>No videos found.</p>
         )}
 
@@ -199,7 +228,7 @@ export default function SearchPage() {
             gap: 20,
           }}
         >
-          {results.map((v) => (
+          {results.items?.map((v) => (
             <VideoCard key={v.video_id} video={v} />
           ))}
         </div>
@@ -304,12 +333,6 @@ function CourseDropdown({ label, placeholder, value, onChange, courses }) {
                 borderBottom: "1px solid #F0F4F8",
               }}
               onMouseDown={(e) => e.preventDefault()}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.backgroundColor = "#F6F9FC")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.backgroundColor = "white")
-              }
             >
               {courseName}
             </li>
@@ -392,12 +415,6 @@ function ProfessorDropdown({ label, placeholder, value, onChange, professors }) 
                 borderBottom: "1px solid #F0F4F8",
               }}
               onMouseDown={(e) => e.preventDefault()}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.backgroundColor = "#F6F9FC")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.backgroundColor = "white")
-              }
             >
               {profName}
             </li>
@@ -417,12 +434,7 @@ function VideoCard({ video }) {
         border: "1px solid #E6EBF1",
         borderRadius: 10,
         padding: 18,
-        transition: "box-shadow .2s ease, transform .1s ease",
       }}
-      onMouseEnter={(e) =>
-        (e.currentTarget.style.boxShadow = "0 6px 20px rgba(0,0,0,0.08)")
-      }
-      onMouseLeave={(e) => (e.currentTarget.style.boxShadow = "none")}
     >
       <div style={{ fontWeight: 700, fontSize: "1rem", marginBottom: 6 }}>
         {video.title}
@@ -431,7 +443,7 @@ function VideoCard({ video }) {
         {video.course_name} ({video.course_id})
       </div>
       <div style={{ color: "#475569", fontSize: ".9rem" }}>
-        Prof. {video.prof_name}
+        Prof. {video.prof_uni}
       </div>
       <div style={{ fontSize: ".85rem", color: "#6B7280", marginTop: 6 }}>
         Uploaded: {new Date(video.uploaded_at).toLocaleDateString()}
