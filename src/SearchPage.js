@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
-const SEARCH_API_BASE = "http://34.63.156.154:8081"; //composite microservice 
-
+const SEARCH_API_BASE = "http://34.42.249.98:8081"; //composite microservice 
 export default function SearchPage() {
   // Local states for filters
   const [keyword, setKeyword] = useState("");
@@ -427,6 +427,7 @@ function ProfessorDropdown({ label, placeholder, value, onChange, professors }) 
 
 /* Video Card */
 function VideoCard({ video }) {
+  const navigate = useNavigate();
   return (
     <div
       style={{
@@ -460,7 +461,7 @@ function VideoCard({ video }) {
           cursor: "pointer",
           fontWeight: 600,
         }}
-        onClick={() => window.open(video.gcs_path, "_blank")}
+        onClick={() => navigate(`/videos/${video.video_id}`)}
       >
         Watch Video
       </button>
