@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { API_BASE } from "./config";
+import { COMPOSITE_BASE_URL } from "./config";
 
 export default function SignInPage() {
   const [email, setEmail] = useState("");
@@ -32,7 +32,7 @@ export default function SignInPage() {
       setLoading(true);
       setError("");
 
-      const res = await fetch(`${API_BASE}/auth/login`, {
+      const res = await fetch(`${COMPOSITE_BASE_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -55,6 +55,9 @@ export default function SignInPage() {
       }
       if (data.role) {
         localStorage.setItem("userRole", data.role);
+      }
+      if(data.uni) {
+        localStorage.setItem("userUni", data.uni);
       }
 
       const dashboardRoute =

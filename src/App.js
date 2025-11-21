@@ -8,6 +8,7 @@ import Splash from "./Splash";
 import SearchPage from "./SearchPage";
 import ProtectedRoute from "./ProtectedRoute";
 import VideoPlayerPage from "./VideoPlayerPage";
+import VideoUploadPage from "./VideoUploadPage";
 
 // Keep these in sync with ROLE_ROUTES returned by the API.
 const DASHBOARD_ROUTES = [
@@ -57,6 +58,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <VideoPlayerPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/upload"
+          element={
+            <ProtectedRoute>
+              <VideoUploadPage />
             </ProtectedRoute>
           }
         />

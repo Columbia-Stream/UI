@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { API_BASE } from "./config"; 
+import { COMPOSITE_BASE_URL } from "./config"; 
 
 
 
 export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [uni, setUni] = useState("");
   const [role, setRole] = useState("student"); // default
   const [emailTouched, setEmailTouched] = useState(false);
   const [triedSubmit, setTriedSubmit] = useState(false);
@@ -21,7 +22,8 @@ export default function SignupPage() {
   const emailValid =
     email.length > 0 && hasAllowedDomain(email);
   const passwordValid = password.length > 0;
-  const formValid = emailValid && passwordValid;
+  const uniValid = uni.length > 0;
+  const formValid = emailValid && passwordValid && uniValid;
 
   const showEmailError =
     (emailTouched || triedSubmit) && email.length > 0 && !emailValid;
@@ -38,13 +40,14 @@ export default function SignupPage() {
           setLoading(true);
           setError("");
       
-          const res = await fetch(`${API_BASE}/auth/signup`, {
+          const res = await fetch(`${COMPOSITE_BASE_URL}/auth/signup`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               email,
               password,
               role,
+              uni
             }),
           });
       
@@ -118,7 +121,18 @@ export default function SignupPage() {
               Only @columbia.edu or @barnard.edu emails allowed.
             </div>
           )}
-
+          {/* Uni */}
+          <Row label="UNI">
+            <input
+              type="uni"
+              placeholder="uni"
+              value={uni}
+              onChange={(e) => setUni(e.target.value)}
+              // onBlur={() => setUniTouched(true)}
+              style={inputStyle}
+            />
+          </Row>
+          
           {/* Password */}
           <Row label="Password">
             <input
