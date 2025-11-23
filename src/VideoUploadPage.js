@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { COMPOSITE_BASE_URL } from './config';
 
 
@@ -21,8 +21,8 @@ const Row = ({ label, children, isError, errorMessage }) => (
 export default function VideoUploadPage() {
   // --- Form State ---
   const [title, setTitle] = useState("");
-  const [offeringId, setOfferingId] = useState("");
-  const [profUni, setProfUni] = useState("");
+  const [offeringId, setOfferingId] = useState(""); // Will hold the selected offering_id
+  // Removed profUni state since it's taken from localStorage in handleSubmit
   const [videoFile, setVideoFile] = useState(null);
 
   // --- Process State ---
@@ -31,9 +31,11 @@ export default function VideoUploadPage() {
   const [error, setError] = useState(null);
   const [triedSubmit, setTriedSubmit] = useState(false);
   const [videoId, setVideoId] = useState(null);
+  const [offerings, setOfferings] = useState([]);
 
   // --- Validation ---
-  const fieldsValid = title.length > 0 && offeringId.length > 0 && profUni.length > 0;
+  // Updated validation: only title and offeringId from fields, and the video file
+  const fieldsValid = title.length > 0 && offeringId.length > 0;
   const fileValid = videoFile !== null && videoFile.type.startsWith('video/');
   const formValid = fieldsValid && fileValid;
 
@@ -105,11 +107,11 @@ export default function VideoUploadPage() {
       const metadataPayload = {
         videoTitle:title,
         offering_id: parseInt(offeringId, 10), // Ensure it's an integer
-        prof_uni: profUni,
+        prof_uni: localStorage.getItem('userUni') || '', // Value fetched from localStorage
         mime_type: videoFile.type, // Send MIME type for signing
       };
 
-      const res = await fetch(`${COMPOSITE_BASE_URL}/videos/start_upload`, {
+      const res = await fetch(`${COMPOSITE_BASE_URL}/start_upload`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(metadataPayload),
@@ -135,18 +137,58 @@ export default function VideoUploadPage() {
     }
   }
 
+  // NOTE: Corrected function name to follow convention and added necessary cleanup
+  async function fetchOfferings() {
+    // Only proceed if not already working
+    if (status !== 'IDLE' && status !== 'ERROR') return;
+    
+    try {
+      // Clear previous error and set a temporary status if needed, though usually not for passive fetches
+      setError(null); 
+      
+      const token = localStorage.getItem("authToken");
+      const res = await fetch(`${COMPOSITE_BASE_URL}/offerings`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      });
+      
+      const data = await res.json();
+      console.log("Offerings fetched:", data);
+      if (!res.ok) {
+        // If status is not ok, treat the response body as the error message
+        throw new Error(data.error || "Failed to fetch offerings list.");
+      }
+      
+      // Update state with fetched offerings
+      setOfferings(data|| []);
+
+    } catch (err) {
+      // Set error message for the user
+      setError(err.message || 'An unknown error occurred while fetching offerings.');
+      // Keep status as IDLE but the error will show in the status box
+      setOfferings([]); 
+    }
+  }
+  
   const handleReset = () => {
     setTitle("");
     setOfferingId("");
-    setProfUni("");
     setVideoFile(null);
     setUploadProgress(0);
     setError(null);
     setStatus('IDLE');
     setTriedSubmit(false);
     setVideoId(null);
-    document.getElementById('file-upload-input').value = null; // Clear file input
+    // Use the file input ID to reset its value
+    const fileInput = document.getElementById('file-upload-input');
+    if(fileInput) fileInput.value = null; 
   };
+
+  // --- Effect to load offerings on component mount ---
+  useEffect(() => {
+    fetchOfferings();
+  }, []); // Empty dependency array means it runs once after initial render
+
 
   // --- Render Status and Progress ---
   const renderStatusBox = () => {
@@ -157,7 +199,10 @@ export default function VideoUploadPage() {
     let message = "Fill out the form and select a video to begin.";
     let bgColor = '#F0F4F8'; // Light gray/blue
     let textColor = '#444';
-    let progressColor = 'bg-blue-600';
+    let progressColor = '#0072C6'; // Blue
+
+    // Check if offerings fetch failed (error but status is IDLE)
+    const isFetchError = error && !isWorking && !isSuccess;
 
     if (isWorking) {
       message = status === 'METADATA_SENT' ? "Sending metadata & creating DB record..." : `Uploading file... ${uploadProgress}%`;
@@ -165,20 +210,21 @@ export default function VideoUploadPage() {
       message = `Upload and DB Entry Complete! Video ID: ${videoId}`;
       bgColor = '#E8F5E9'; // Light green
       textColor = '#1B5E20'; // Dark green
-      progressColor = 'bg-green-600';
-    } else if (isError) {
+      progressColor = '#1B5E20';
+    } else if (isError || isFetchError) {
       message = error;
       bgColor = '#FDECEC'; // Light red
       textColor = '#B00020'; // Dark red
-      progressColor = 'bg-red-600';
+      progressColor = '#B00020';
     }
 
     return (
-      <div style={{ marginTop: 20, padding: 15, borderRadius: 8, backgroundColor: bgColor, border: `1px solid ${isError ? '#B00020' : isSuccess ? '#1B5E20' : '#A7C2DD'}` }}>
+      <div style={{ marginTop: 20, padding: 15, borderRadius: 8, backgroundColor: bgColor, border: `1px solid ${isError || isFetchError ? '#B00020' : isSuccess ? '#1B5E20' : '#A7C2DD'}` }}>
         <p style={{ color: textColor, fontWeight: 500, fontSize: '.9rem' }}>
           {message}
         </p>
-        {(isWorking || isSuccess || isError) && (
+        {/* Only show progress bar for working/success states, or when an upload error happens */}
+        {(isWorking || isSuccess || (isError && status !== 'IDLE')) && (
           <div style={{ marginTop: 10, height: 10, backgroundColor: '#ccc', borderRadius: 5, overflow: 'hidden' }}>
             <div 
               style={{ 
@@ -193,7 +239,7 @@ export default function VideoUploadPage() {
       </div>
     );
   };
-
+  
   // --- Render ---
   return (
     <div
@@ -205,7 +251,7 @@ export default function VideoUploadPage() {
         padding: '20px 0'
       }}
     >
-      <h1 style={{ color: "white", marginBottom: 20, fontSize: "2rem", letterSpacing: 1 }}>
+      <h1 style={{ color: "Black", marginBottom: 20, fontSize: "2rem", letterSpacing: 1 }}>
         Upload Video
       </h1>
 
@@ -233,39 +279,29 @@ export default function VideoUploadPage() {
             />
           </Row>
 
-          {/* Offering ID (INT field) */}
+          {/* Offering ID (Dropdown) */}
           <Row 
-            label="Offering ID (DB INT)" 
+            label="Select Course Offering" 
             isError={triedSubmit && offeringId.length === 0} 
-            errorMessage="Offering ID is required for JOINs."
+            errorMessage={offerings.length === 0 ? "No offerings loaded. Check console for fetch error." : "A course offering must be selected."}
           >
-            <input
-              type="number"
-              placeholder="e.g., 123"
+            <select
               value={offeringId}
               onChange={(e) => setOfferingId(e.target.value)}
               style={inputStyle}
-              disabled={status !== 'IDLE' && status !== 'ERROR'}
-            />
+              disabled={status !== 'IDLE' && status !== 'ERROR' || offerings.length === 0}
+            >
+              <option value="" disabled>
+                {offerings.length === 0 ? "Loading Offerings..." : "--- Select an Offering ---"}
+              </option>
+              {offerings.map(offering => (
+                <option key={offering.offering_id} value={offering.offering_id}>
+                  {`${offering.course_id} | ${offering.semester} ${offering.year} (ID: ${offering.offering_id})`}
+                </option>
+              ))}
+            </select>
           </Row>
           
-          {/* Prof UNI (VARCHAR field) */}
-          <Row 
-            label="Professor UNI" 
-            isError={triedSubmit && profUni.length === 0} 
-            errorMessage="Professor UNI is required."
-          >
-            <input
-              type="text"
-              placeholder="e.g., ts3747"
-              value={profUni}
-              onChange={(e) => setProfUni(e.target.value)}
-              style={inputStyle}
-              disabled={status !== 'IDLE' && status !== 'ERROR'}
-            />
-          </Row>
-          
-
           {/* File Upload */}
           <Row 
             label="Select Video File"
@@ -310,7 +346,26 @@ export default function VideoUploadPage() {
              status === 'ERROR' ? 'RETRY UPLOAD' :
              'START UPLOAD PROCESS'}
           </button>
-
+          {/* Reset Button */}
+          <button
+            type="button"
+            onClick={handleReset}
+            style={{
+              marginTop: 5,
+              width: "100%",
+              padding: 12,
+              backgroundColor: "#6c757d",
+              color: "white",
+              border: "none",
+              borderRadius: 3,
+              fontWeight: "bold",
+              fontSize: "1rem",
+              textTransform: "uppercase",
+              cursor: "pointer",
+            }}
+          >
+            RESET FORM
+          </button>
         </form>
       </div>
     </div>
