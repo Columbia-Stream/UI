@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-const SEARCH_API_BASE = "http://34.42.249.98:8081"; //composite microservice 
+const SEARCH_API_BASE = "http://34.172.231.255:8081"; //composite microservice 
 export default function SearchPage() {
   // Local states for filters
   const [keyword, setKeyword] = useState("");
