@@ -1,16 +1,18 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-const SEARCH_API_BASE = "http://34.172.231.255:8081"; //composite microservice 
+const SEARCH_API_BASE = "http://34.172.231.255:8081"; // Composite MS
+
 export default function SearchPage() {
   // Local states for filters
   const [keyword, setKeyword] = useState("");
   const [courseId, setCourseId] = useState("");
   const [prof, setProf] = useState("");
 
-  // IMPORTANT FIX → results is an OBJECT with items[]
-  const [results, setResults] = useState({ items: [] });
+  const [year, setYear] = useState("");        // NEW
+  const [semester, setSemester] = useState(""); // NEW
 
+  const [results, setResults] = useState({ items: [] });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -23,8 +25,9 @@ export default function SearchPage() {
     "Yunzhu Li",
     "Parijat Dube",
     "Richard Zemel",
+    "Test Professor 1"
   ];
-  
+
   const PROFESSOR_MAP = {
     "Donald Ferguson": "abc9",
     "Nakul Verma": "def9",
@@ -33,17 +36,19 @@ export default function SearchPage() {
     "Yunzhu Li": "yz56",
     "Parijat Dube": "pjd22",
     "Richard Zemel": "rzm88",
+    "Test Professor 1": "ts37471_prof"
   };
-
 
   const courseList = [
     "COMSW4153",
     "COMSW4774",
-    "COMSW4761",
+    "COMSW4701",
     "COMSE6998",
     "COMSE4776",
   ];
 
+  const semesterList = ["Fall", "Spring", "Summer"];   // NEW
+  const yearList = ["2025", "2024", "2023"];           // NEW
 
   async function handleSearch(e) {
     e.preventDefault();
@@ -53,20 +58,16 @@ export default function SearchPage() {
     try {
       const params = new URLSearchParams();
 
-      // ALWAYS allowed → keyword
       if (keyword.trim() !== "") params.append("q", keyword.trim());
-
-      // if (courseId && courseList.includes(courseId)) {
-      //   params.append("course_id", courseId);
-      // }
-      if (courseId) {
-        params.append("course_id", courseId.trim());
-        console.log("courseId being sent =", courseId);
-      }
+      if (courseId) params.append("course_id", courseId.trim());
 
       if (prof && professorList.includes(prof)) {
         params.append("prof", PROFESSOR_MAP[prof]);
       }
+
+      // NEW — append year + semester
+      if (year) params.append("year", year);
+      if (semester) params.append("semester", semester);
 
       const idToken = localStorage.getItem("authToken");
       if (!idToken) throw new Error("You must be logged in to search");
@@ -83,7 +84,6 @@ export default function SearchPage() {
 
       if (!res.ok) throw new Error("Failed to fetch search results");
 
-      // FIX → This is an object with items
       const data = await res.json();
       setResults(data);
 
@@ -98,6 +98,8 @@ export default function SearchPage() {
     setKeyword("");
     setCourseId("");
     setProf("");
+    setYear("");        // NEW
+    setSemester("");    // NEW
     setResults({ items: [] });
   }
 
@@ -112,7 +114,7 @@ export default function SearchPage() {
           '-apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, Segoe UI, Roboto, Helvetica, Arial, sans-serif',
       }}
     >
-      {/* Left Filter Panel*/}
+      {/* Left Filter Panel */}
       <aside
         style={{
           background: "white",
@@ -156,6 +158,24 @@ export default function SearchPage() {
             value={prof}
             onChange={setProf}
             professors={professorList}
+          />
+
+          {/* NEW — SEMESTER */}
+          <CourseDropdown
+            label="Semester"
+            placeholder="Fall / Spring / Summer"
+            value={semester}
+            onChange={setSemester}
+            courses={semesterList}
+          />
+
+          {/* NEW — YEAR */}
+          <CourseDropdown
+            label="Year"
+            placeholder="2025 / 2024 / 2023"
+            value={year}
+            onChange={setYear}
+            courses={yearList}
           />
 
           <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
@@ -237,7 +257,7 @@ export default function SearchPage() {
   );
 }
 
-/*FilterField*/
+/* FilterField */
 function FilterField({ label, placeholder, value, onChange }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -261,7 +281,7 @@ function FilterField({ label, placeholder, value, onChange }) {
   );
 }
 
-/* Course Dropdown */
+/* Generic Dropdown — reused for course, semester, year */
 function CourseDropdown({ label, placeholder, value, onChange, courses }) {
   const [query, setQuery] = useState(value || "");
   const [showOptions, setShowOptions] = useState(false);
@@ -270,8 +290,8 @@ function CourseDropdown({ label, placeholder, value, onChange, courses }) {
     setQuery(value || "");
   }, [value]);
 
-  const filtered = courses.filter((course) =>
-    course.toLowerCase().includes(query.toLowerCase())
+  const filtered = courses.filter((c) =>
+    c.toLowerCase().includes(query.toLowerCase())
   );
 
   return (
@@ -279,6 +299,7 @@ function CourseDropdown({ label, placeholder, value, onChange, courses }) {
       <label style={{ fontWeight: 600, fontSize: ".95rem", color: "#1E293B" }}>
         {label}
       </label>
+
       <input
         type="text"
         placeholder={placeholder}
@@ -318,12 +339,12 @@ function CourseDropdown({ label, placeholder, value, onChange, courses }) {
             zIndex: 10,
           }}
         >
-          {filtered.map((courseName) => (
+          {filtered.map((name) => (
             <li
-              key={courseName}
+              key={name}
               onClick={() => {
-                onChange(courseName);
-                setQuery(courseName);
+                onChange(name);
+                setQuery(name);
                 setShowOptions(false);
               }}
               style={{
@@ -334,7 +355,7 @@ function CourseDropdown({ label, placeholder, value, onChange, courses }) {
               }}
               onMouseDown={(e) => e.preventDefault()}
             >
-              {courseName}
+              {name}
             </li>
           ))}
         </ul>
@@ -440,15 +461,19 @@ function VideoCard({ video }) {
       <div style={{ fontWeight: 700, fontSize: "1rem", marginBottom: 6 }}>
         {video.title}
       </div>
+
       <div style={{ color: "#5A6A84", fontSize: ".9rem", marginBottom: 8 }}>
-        {video.course_name} ({video.course_id})
+        {video.course_name} ({video.course_id}) — {video.semester} {video.year}
       </div>
+
       <div style={{ color: "#475569", fontSize: ".9rem" }}>
         Prof. {video.prof_uni}
       </div>
+
       <div style={{ fontSize: ".85rem", color: "#6B7280", marginTop: 6 }}>
         Uploaded: {new Date(video.uploaded_at).toLocaleDateString()}
       </div>
+
       <button
         style={{
           marginTop: 10,
