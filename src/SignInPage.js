@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { COMPOSITE_BASE_URL } from "./config";
 
 export default function SignInPage() {
@@ -168,7 +168,7 @@ export default function SignInPage() {
           </button>
 
           <div style={{ fontSize: ".9rem", color: "#5A6A84", marginTop: 8 }}>
-            New here? <a href="/signup">Create an account</a>
+            New here? <Link to="/signup">Create an account</Link>
           </div>
         </form>
       </div>

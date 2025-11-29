@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { HashRouter, Routes, Route, Navigate } from "react-router-dom";
 import SignupPage from "./SignUpPage";
 import SignInPage from "./SignInPage";
 import Dashboard from "./Dashboard";
@@ -27,7 +27,7 @@ const DASHBOARD_ROUTES = [
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         {/* default → /signup */}
         <Route path="/" element={<Navigate to="/signup" replace />} />
@@ -71,6 +71,6 @@ export default function App() {
         />
 
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   );
 }

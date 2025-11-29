@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { COMPOSITE_BASE_URL } from "./config"; 
 
 
@@ -199,7 +199,7 @@ export default function SignupPage() {
               marginTop: 8,
             }}
           >
-            Already a member? <a href="/login">Log in</a>
+            Already a member? <Link to="/login">Log in</Link>
           </div>
         </form>
       </div>
