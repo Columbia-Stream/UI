@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { COMPOSITE_BASE_URL } from "./config";
+
 
 const SEARCH_API_BASE = "http://34.172.231.255:8081"; // Composite MS
 
@@ -15,31 +17,56 @@ export default function SearchPage() {
   const [results, setResults] = useState({ items: [] });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [professorList, setProfessorList] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+        try {
+            const res = await fetch(`${COMPOSITE_BASE_URL}/auth/get-profs`, {
+                method: "GET",
+                headers: { "Content-Type": "application/json" },
+            });
+            
+            const data = await res.json();
+            console.log("Profs fetched:", data);
+            
+            if (!res.ok) {
+                // If status is not ok, treat the response body as the error message
+                throw new Error(data.error || "Failed to fetch profs list.");
+            }
+            setProfessorList(data?.list?.map((p) => p.uni) || []);
+        } catch (error) {
+            // Handle error, e.g., set an error state
+            console.error("Fetch error:", error);
+        }
+    };
+    fetchData();
+  }, []);
 
   // Static dropdown data
-  const professorList = [
-    "Donald Ferguson",
-    "Nakul Verma",
-    "Ansaf Salleb-Aouissi",
-    "Daniel Bauer",
-    "Yunzhu Li",
-    "Parijat Dube",
-    "Richard Zemel",
-    "Test Professor 1",
-    "Test Professor 2"
-  ];
+  // const professorList = [
+  //   "Donald Ferguson",
+  //   "Nakul Verma",
+  //   "Ansaf Salleb-Aouissi",
+  //   "Daniel Bauer",
+  //   "Yunzhu Li",
+  //   "Parijat Dube",
+  //   "Richard Zemel",
+  //   "Test Professor 1",
+  //   "Test Professor 2"
+  // ];
 
-  const PROFESSOR_MAP = {
-    "Donald Ferguson": "abc9",
-    "Nakul Verma": "def9",
-    "Ansaf Salleb-Aouissi": "ghi2",
-    "Daniel Bauer": "db12",
-    "Yunzhu Li": "yz56",
-    "Parijat Dube": "pjd22",
-    "Richard Zemel": "rzm88",
-    "Test Professor 1": "ts37471_prof",
-    "Test Professor 2": "ts3747"
-  };
+  // const PROFESSOR_MAP = {
+  //   "Donald Ferguson": "abc9",
+  //   "Nakul Verma": "def9",
+  //   "Ansaf Salleb-Aouissi": "ghi2",
+  //   "Daniel Bauer": "db12",
+  //   "Yunzhu Li": "yz56",
+  //   "Parijat Dube": "pjd22",
+  //   "Richard Zemel": "rzm88",
+  //   "Test Professor 1": "ts37471_prof",
+  //   "Test Professor 2": "ts3747"
+  // };
 
   const courseList = [
     "COMSW4153",
@@ -64,7 +91,7 @@ export default function SearchPage() {
       if (courseId) params.append("course_id", courseId.trim());
 
       if (prof && professorList.includes(prof)) {
-        params.append("prof", PROFESSOR_MAP[prof]);
+        params.append("prof", prof);
       }
 
       // NEW — append year + semester
