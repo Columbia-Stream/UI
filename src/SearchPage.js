@@ -25,7 +25,8 @@ export default function SearchPage() {
     "Yunzhu Li",
     "Parijat Dube",
     "Richard Zemel",
-    "Test Professor 1"
+    "Test Professor 1",
+    "Test Professor 2"
   ];
 
   const PROFESSOR_MAP = {
@@ -36,7 +37,8 @@ export default function SearchPage() {
     "Yunzhu Li": "yz56",
     "Parijat Dube": "pjd22",
     "Richard Zemel": "rzm88",
-    "Test Professor 1": "ts37471_prof"
+    "Test Professor 1": "ts37471_prof",
+    "Test Professor 2": "ts3747"
   };
 
   const courseList = [
@@ -486,7 +488,9 @@ function VideoCard({ video }) {
           cursor: "pointer",
           fontWeight: 600,
         }}
-        onClick={() => navigate(`/videos/${video.video_id}`)}
+        onClick={() => window.location.href = "https://storage.googleapis.com/hls_encodings/6e4dfa1c-0297-4e69-93f5-32a4648fd9e8/playlist.m3u8"}
+
+        
       >
         Watch Video
       </button>

@@ -135,7 +135,7 @@ export default function Dashboard() {
         }}
       >
         {/* Browse Section */}
-        <div
+        {/* <div
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
@@ -157,7 +157,7 @@ export default function Dashboard() {
             onClick={() => navigate("/professors")}
             icon="🎓"
           />
-        </div>
+        </div> */}
 
         {/* Continue Watching Section */}
         <SectionTitle>Continue Watching</SectionTitle>
