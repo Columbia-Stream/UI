@@ -9,6 +9,7 @@ import SearchPage from "./SearchPage";
 import ProtectedRoute from "./ProtectedRoute";
 import VideoPlayerPage from "./VideoPlayerPage";
 import VideoUploadPage from "./VideoUploadPage";
+import UserProfile from "./UserProfile";
 
 // Keep these in sync with ROLE_ROUTES returned by the API.
 const DASHBOARD_ROUTES = [
@@ -66,6 +67,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <VideoUploadPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <UserProfile />
             </ProtectedRoute>
           }
         />

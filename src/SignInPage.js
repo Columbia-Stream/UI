@@ -1,6 +1,23 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { COMPOSITE_BASE_URL } from "./config";
+import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { initializeApp } from "firebase/app";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyD1tYM2V3wCxTz1stBFLXo5uPYktavyraU",
+    authDomain: "qualified-root-474022-u3.firebaseapp.com",
+    projectId: "qualified-root-474022-u3",
+    // ... other config fields are optional for auth
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+
+// Optional: Add scopes if you need more than the default identity/email/profile
+provider.addScope('https://www.googleapis.com/auth/userinfo.email');
+provider.getCustomParameters({prompt: 'select_account'})
 
 export default function SignInPage() {
   const [email, setEmail] = useState("");
@@ -9,6 +26,10 @@ export default function SignInPage() {
   const [triedSubmit, setTriedSubmit] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [oauthError, setOauthError] = useState("");
+  const [userEmail, setUserEmail] = useState(null);
+  const [token, setToken] = useState(null);
+
 
   const navigate = useNavigate();
 
@@ -74,6 +95,91 @@ export default function SignInPage() {
       setLoading(false);
     }
   }
+
+  async function processOauthToken(token) {
+
+    try {
+      setLoading(true);
+      setError("");
+
+      const res = await fetch(`${COMPOSITE_BASE_URL}/auth/handle-oauth`, {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.detail || data.message || `Login failed (${res.status})`);
+      }
+      
+
+      const emailFromApi = data.email || data.user_email;
+
+      localStorage.setItem("authToken", token);
+      if (emailFromApi) {
+        localStorage.setItem("userEmail", emailFromApi);
+      }
+      if (data.role) {
+        localStorage.setItem("userRole", data.role);
+      }
+      if(data.uni) {
+        localStorage.setItem("userUni", data.uni);
+      }
+
+      const dashboardRoute =
+        data.dashboard_route || data.dashboardRoute || "/dashboard";
+      localStorage.setItem("dashboardRoute", dashboardRoute);
+
+      // Show splash then route-specific dashboard
+      navigate(
+        `/splash?mode=loginSuccess&next=${encodeURIComponent(dashboardRoute)}`
+      );
+    } catch (err) {
+      setError(err.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Function to handle the Google Sign-In process
+    const handleGoogleSignIn = async () => {
+        setToken(null);
+        setUserEmail(null);
+        setOauthError("");
+        try {
+            // Initiate the sign-in with a popup
+            const result = await signInWithPopup(auth, provider);
+            
+            // Get the User object
+            const user = result.user;
+
+            // 🔑 CRITICAL STEP: Get the verifiable Firebase ID Token (JWT)
+            const idToken = await user.getIdToken();
+
+            // Update component state
+            setUserEmail(user.email);
+            setToken(idToken);
+            console.log("Successfully retrieved ID Token:", idToken);
+            
+            // 🚨 NEXT STEP: Send this token to your backend for verification
+            // Example: await fetch('/api/verify-token', { 
+            //              method: 'POST', 
+            //              headers: { 'Authorization': `Bearer ${idToken}` }
+            //          });
+
+            await processOauthToken(idToken);
+            
+        } catch (err) {
+            console.error("Google Sign-In Error:", err);
+            
+            
+            // Firebase will often return specific error codes here, 
+            // for example, if the domain restriction check (columbia.edu/barnard.edu) fails.
+            if (err.code === 'auth/unauthorized-domain') {
+                 setOauthError("Sign-in failed: Your email domain is not authorized.");
+            }
+        } 
+    };
 
   return (
     <div
@@ -171,6 +277,48 @@ export default function SignInPage() {
             New here? <Link to="/signup">Create an account</Link>
           </div>
         </form>
+        <button
+                onClick={handleGoogleSignIn}
+                disabled={loading}
+                style={{
+                    backgroundColor: '#4285F4',
+                    color: 'white',
+                    padding: '10px 20px',
+                    fontSize: '16px',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: loading ? 'not-allowed' : 'pointer',
+                }}
+            >
+                {'Continue with Google'}
+        </button>
+        {oauthError && (
+            <div
+              role="alert"
+              style={{
+                color: "#B00020", background: "#FDECEC", border: "1px solid #F5B7B1",
+                borderRadius: 6, padding: "8px 10px", fontSize: ".86rem", marginTop: -8,
+              }}
+            >
+              {oauthError}
+            </div>
+          )}
+          {/* {userEmail && (
+                <div style={{ marginTop: '20px', border: '1px solid #ccc', padding: '15px' }}>
+                    <p>✅ **Sign-in Successful!**</p>
+                    <p>Logged in as: **{userEmail}**</p>
+                    
+                    <h3>Verifiable ID Token:</h3>
+                    <textarea 
+                        rows="5" 
+                        readOnly 
+                        value={token} 
+                        style={{ width: '100%', resize: 'none' }}
+                        placeholder="ID Token"
+                    />
+                    <p style={{ fontSize: '12px', color: '#555' }}>Send this JWT to your backend for security verification.</p>
+                </div>
+            )} */}
       </div>
     </div>
   );
