@@ -1,7 +1,16 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import LogoutConfirmDialog from "./LogoutConfirmDialog";
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
+  const handleConfirmLogout = () => {
+    setShowLogoutConfirm(false);
+    localStorage.clear();
+    navigate("/login", { replace: true });
+  };
 
   return (
     <div
@@ -84,6 +93,32 @@ export default function Dashboard() {
             }}
           >
             Profile
+          </button>
+
+          {/* Logout Button */}
+          <button
+            onClick={() => setShowLogoutConfirm(true)}
+            style={{
+              marginLeft: 12,
+              background: "#FFF6F5",
+              border: "1px solid #FAD4D4",
+              color: "#B42318",
+              padding: "8px 14px",
+              borderRadius: 10,
+              cursor: "pointer",
+              fontWeight: 600,
+              transition: "background-color .2s ease, border-color .2s ease",
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.backgroundColor = "#FFE4E0";
+              e.currentTarget.style.borderColor = "#F8B4AD";
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.backgroundColor = "#FFF6F5";
+              e.currentTarget.style.borderColor = "#FAD4D4";
+            }}
+          >
+            Logout
           </button>
         </div>
       </header>
@@ -174,6 +209,11 @@ export default function Dashboard() {
           ))}
         </div>
       </main>
+      <LogoutConfirmDialog
+        open={showLogoutConfirm}
+        onConfirm={handleConfirmLogout}
+        onCancel={() => setShowLogoutConfirm(false)}
+      />
     </div>
   );
 }
