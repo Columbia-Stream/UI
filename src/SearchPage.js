@@ -535,8 +535,16 @@ function VideoCard({ video }) {
           fontWeight: 600,
         }}
         // onClick={() => window.location.href = "https://storage.googleapis.com/hls_encodings/6e4dfa1c-0297-4e69-93f5-32a4648fd9e8/playlist.m3u8"}
+        // onClick={()=>{
+        //   window.open(video.gcs_path, '_blank', 'noopener,noreferrer');
+        // }}
         onClick={()=>{
-          window.open(video.gcs_path, '_blank', 'noopener,noreferrer');
+          // const encodedUrl = encodeURIComponent(video.gcs_path);
+          // navigate(`/videos?link=${encodedUrl}`);
+          let title = (video.title || "Video") + " " +(video.course_id || "Untitled");
+          navigate(
+  `/videos?link=${encodeURIComponent(video.gcs_path)}&title=${encodeURIComponent(title)}&term=${encodeURIComponent(video.semester)}&year=${encodeURIComponent(video.year)}`
+);
         }}
 
         
