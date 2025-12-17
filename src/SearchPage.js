@@ -18,6 +18,7 @@ export default function SearchPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [professorList, setProfessorList] = useState([]);
+  const [courseList, setCourseList] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -35,6 +36,30 @@ export default function SearchPage() {
                 throw new Error(data.error || "Failed to fetch profs list.");
             }
             setProfessorList(data?.list?.map((p) => p.uni) || []);
+        } catch (error) {
+            // Handle error, e.g., set an error state
+            console.error("Fetch error:", error);
+        }
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+        try {
+            const res = await fetch(`${COMPOSITE_BASE_URL}/courses`, {
+                method: "GET",
+                headers: { "Content-Type": "application/json" },
+            });
+            
+            const data = await res.json();
+            console.log("Courses fetched:", data);
+            
+            if (!res.ok) {
+                // If status is not ok, treat the response body as the error message
+                throw new Error(data.error || "Failed to fetch courses list.");
+            }
+            setCourseList(data?.map((p) => p.course_id) || []);
         } catch (error) {
             // Handle error, e.g., set an error state
             console.error("Fetch error:", error);
@@ -68,13 +93,7 @@ export default function SearchPage() {
   //   "Test Professor 2": "ts3747"
   // };
 
-  const courseList = [
-    "COMSW4153",
-    "COMSW4774",
-    "COMSW4701",
-    "COMSE6998",
-    "COMSE4776",
-  ];
+  
 
   const semesterList = ["Fall", "Spring", "Summer"];   // NEW
   const yearList = ["2025", "2024", "2023"];           // NEW
@@ -182,7 +201,7 @@ export default function SearchPage() {
           />
 
           <ProfessorDropdown
-            label="Professor"
+            label="Professor(s)"
             placeholder="Type to search..."
             value={prof}
             onChange={setProf}
@@ -515,7 +534,10 @@ function VideoCard({ video }) {
           cursor: "pointer",
           fontWeight: 600,
         }}
-        onClick={() => window.location.href = "https://storage.googleapis.com/hls_encodings/6e4dfa1c-0297-4e69-93f5-32a4648fd9e8/playlist.m3u8"}
+        // onClick={() => window.location.href = "https://storage.googleapis.com/hls_encodings/6e4dfa1c-0297-4e69-93f5-32a4648fd9e8/playlist.m3u8"}
+        onClick={()=>{
+          window.open(video.gcs_path, '_blank', 'noopener,noreferrer');
+        }}
 
         
       >

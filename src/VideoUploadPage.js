@@ -147,7 +147,7 @@ export default function VideoUploadPage() {
       setError(null); 
       
       const token = localStorage.getItem("authToken");
-      const res = await fetch(`${COMPOSITE_BASE_URL}/offerings`, {
+      const res = await fetch(`${COMPOSITE_BASE_URL}/prof_offer/${localStorage.getItem('userUni')}`, {
         method: "GET",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       });
