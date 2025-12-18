@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LogoutConfirmDialog from "./LogoutConfirmDialog";
 
-export default function Dashboard() {
+export default function DashboardStudent() {
   const navigate = useNavigate();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
@@ -22,7 +22,7 @@ export default function Dashboard() {
         color: "#0E1B2A",
       }}
     >
-      {/* ---------- Top Navigation Bar ---------- */}
+      {/* ---------- Top Navigation Bar (UNCHANGED) ---------- */}
       <header
         style={{
           position: "sticky",
@@ -54,7 +54,6 @@ export default function Dashboard() {
 
           <div style={{ flex: 1 }} />
 
-          {/* Search Button */}
           <button
             onClick={() => navigate("/search")}
             style={{
@@ -70,15 +69,11 @@ export default function Dashboard() {
             onMouseOver={(e) =>
               (e.currentTarget.style.backgroundColor = "#0080CC")
             }
-            onMouseOut={(e) =>
-              (e.currentTarget.style.backgroundColor = "#009EFF")
-            }
+            onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "#009EFF")}
           >
             Search
           </button>
 
-
-          {/* Profile Button */}
           <button
             onClick={() => navigate("/profile")}
             style={{
@@ -95,7 +90,6 @@ export default function Dashboard() {
             Profile
           </button>
 
-          {/* Logout Button */}
           <button
             onClick={() => setShowLogoutConfirm(true)}
             style={{
@@ -123,7 +117,7 @@ export default function Dashboard() {
         </div>
       </header>
 
-      {/* Hero Section*/}
+      {/* ---------- Hero ---------- */}
       <section
         style={{
           borderBottom: "1px solid #F2F5F9",
@@ -135,80 +129,159 @@ export default function Dashboard() {
           style={{
             maxWidth: 1120,
             margin: "0 auto",
-            padding: "36px 20px 28px",
+            padding: "44px 20px 30px",
+            display: "grid",
+            gridTemplateColumns: "1.3fr 0.9fr",
+            gap: 18,
           }}
         >
-          <h1
+          <div>
+            <h1
+              style={{
+                fontSize: "2.1rem",
+                fontWeight: 800,
+                letterSpacing: "-0.3px",
+                margin: 0,
+              }}
+            >
+              Welcome back to ColumbiaStream
+            </h1>
+
+            <p
+              style={{
+                margin: "10px 0 0 0",
+                color: "#5A6A84",
+                lineHeight: 1.65,
+                maxWidth: 760,
+                fontSize: "1.03rem",
+              }}
+            >
+              A centralized lecture streaming platform designed for both students and
+              faculty — with role-based dashboards and tools.
+            </p>
+          </div>
+
+          <div
             style={{
-              fontSize: "1.6rem",
-              fontWeight: 700,
-              letterSpacing: "0.1px",
-              margin: 0,
+              background: "#FFFFFF",
+              border: "1px solid #EAEFF5",
+              borderRadius: 16,
+              padding: 18,
+              boxShadow: "0 8px 26px rgba(20,40,70,0.06)",
+              alignSelf: "start",
             }}
           >
-            Welcome back
-          </h1>
-          <p
-            style={{
-              margin: "8px 0 0 0",
-              color: "#5A6A84",
-              lineHeight: 1.6,
-              maxWidth: 760,
-            }}
-          >
-            Browse courses and professors, or resume a recent lecture.
-          </p>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div
+                style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: 14,
+                  background:
+                    "linear-gradient(135deg, rgba(0,158,255,0.16), rgba(0,76,153,0.10))",
+                  display: "grid",
+                  placeItems: "center",
+                  fontSize: 18,
+                  fontWeight: 800,
+                  color: "#0E5AA7",
+                }}
+              >
+                i
+              </div>
+              <div>
+                <div style={{ fontWeight: 800, color: "#13243A" }}>
+                  Role-based access
+                </div>
+                <div style={{ color: "#5A6A84", fontSize: ".92rem", marginTop: 2 }}>
+                  Your role determines the dashboard you see.
+                </div>
+              </div>
+            </div>
+
+            <div
+              style={{
+                marginTop: 12,
+                padding: 12,
+                borderRadius: 14,
+                background: "#F6FBFF",
+                border: "1px solid #DCEEFF",
+                color: "#315B86",
+                lineHeight: 1.5,
+                fontSize: ".93rem",
+              }}
+            >
+              You can set or switch your role in <b>Profile</b>. If you logged in with
+              Google, the role can still be updated there.
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Main Body */}
+      {/* ---------- Main ---------- */}
       <main
         style={{
           maxWidth: 1120,
           margin: "0 auto",
-          padding: "28px 20px 56px",
+          padding: "28px 20px 72px",
         }}
       >
-        {/* Browse Section */}
-        {/* <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-            gap: 18,
-            marginBottom: 28,
-          }}
-        >
-          <Card
-            title="Browse Courses"
-            subtitle="Find lectures by course code or name."
-            cta="courses"
-            onClick={() => navigate("/courses")}
-            icon="📘"
+        {/* Students (2 per row) */}
+        <SectionTitle>For Students</SectionTitle>
+        <TwoColGrid>
+          <FeatureCard
+            icon="▶️"
+            title="Watch lectures"
+            subtitle="Stream recorded lectures anytime, from anywhere."
           />
-          <Card
-            title="Browse Professors"
-            subtitle="Browse lectures by professor name."
-            cta="professors"
-            onClick={() => navigate("/professors")}
-            icon="🎓"
+          <FeatureCard
+            icon="🔎"
+            title="Browse & search"
+            subtitle="Find lectures by topic, course ID, or professor."
           />
-        </div> */}
+          <FeatureCard
+            icon="📚"
+            title="Course-friendly organization"
+            subtitle="Quickly locate what you need for a specific class."
+          />
+          <FeatureCard
+            icon="🧭"
+            title="Easy navigation"
+            subtitle="Use Search and Profile from the top bar anytime."
+          />
+        </TwoColGrid>
 
-        {/* Continue Watching Section */}
-        <SectionTitle>Continue Watching</SectionTitle>
+        <div style={{ height: 22 }} />
 
+        {/* Search section (no tips, no quick tips) */}
+        <SectionTitle>How Search Works</SectionTitle>
         <div
           style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-            gap: 16,
+            background: "#FFFFFF",
+            border: "1px solid #EAEFF5",
+            borderRadius: 16,
+            padding: 18,
           }}
         >
-          {Array.from({ length: 6 }).map((_, i) => (
-            <VideoTile key={i} />
-          ))}
+          <div style={{ color: "#5A6A84", lineHeight: 1.6, marginBottom: 12 }}>
+            Search using these categories:
+          </div>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))",
+              gap: 12,
+            }}
+          >
+            <CategoryCard label="Keyword" example="Title or topic" icon="🔤" />
+            <CategoryCard label="Course ID" example="COMS 4153" icon="🏷️" />
+            <CategoryCard label="Professor(s)" example="Type to search" icon="🧑‍🏫" />
+            <CategoryCard label="Semester" example="Fall / Spring / Summer" icon="🗓️" />
+            <CategoryCard label="Year" example="2025 / 2024 / 2023" icon="📌" />
+          </div>
         </div>
       </main>
+
       <LogoutConfirmDialog
         open={showLogoutConfirm}
         onConfirm={handleConfirmLogout}
@@ -218,14 +291,15 @@ export default function Dashboard() {
   );
 }
 
-/* ---------- Subcomponents ---------- */
+/* ---------- UI helpers ---------- */
+
 function SectionTitle({ children }) {
   return (
     <h2
       style={{
-        fontSize: "1.05rem",
+        fontSize: "1.1rem",
         color: "#1F2A37",
-        fontWeight: 700,
+        fontWeight: 800,
         margin: "6px 2px 12px",
         letterSpacing: "0.2px",
       }}
@@ -235,122 +309,122 @@ function SectionTitle({ children }) {
   );
 }
 
-function Card({ title, subtitle, cta, onClick, icon }) {
+function TwoColGrid({ children }) {
+  return (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+        gap: 18,
+      }}
+    >
+      <style>
+        {`
+          @media (max-width: 860px) {
+            .twoColGridFallback { grid-template-columns: 1fr !important; }
+          }
+        `}
+      </style>
+      <div className="twoColGridFallback" style={{ display: "contents" }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function FeatureCard({ icon, title, subtitle }) {
   return (
     <div
       style={{
         background: "#FFFFFF",
-        borderRadius: 14,
-        border: "1px solid #EAEFF5",
-        padding: 18,
-        display: "grid",
-        gridTemplateColumns: "auto 1fr auto",
+        borderRadius: 18,
+        border: "1px solid #E6EEF6",
+        padding: 22,
+        transition: "border-color .2s ease, box-shadow .2s ease, transform .06s ease",
+        minHeight: 120,
+        display: "flex",
         alignItems: "center",
         gap: 16,
-        transition: "border-color .2s ease, transform .06s ease",
       }}
-      onMouseEnter={(e) => (e.currentTarget.style.borderColor = "#D7E5F5")}
-      onMouseLeave={(e) => (e.currentTarget.style.borderColor = "#EAEFF5")}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.borderColor = "#D7E5F5";
+        e.currentTarget.style.boxShadow = "0 12px 30px rgba(20,40,70,0.06)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.borderColor = "#E6EEF6";
+        e.currentTarget.style.boxShadow = "none";
+      }}
       onMouseDown={(e) => (e.currentTarget.style.transform = "scale(0.996)")}
       onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
     >
       <div
         aria-hidden
         style={{
-          height: 44,
-          width: 44,
-          borderRadius: 12,
+          height: 56,
+          width: 56,
+          borderRadius: 18,
           background: "#F1F8FF",
           display: "grid",
           placeItems: "center",
-          fontSize: 20,
+          fontSize: 22,
+          flex: "0 0 auto",
         }}
       >
         {icon}
       </div>
+
       <div>
-        <div style={{ fontWeight: 700, marginBottom: 2 }}>{title}</div>
-        <div style={{ color: "#64748B", fontSize: ".95rem" }}>{subtitle}</div>
+        <div
+          style={{
+            fontWeight: 900,
+            marginBottom: 6,
+            color: "#13243A",
+            fontSize: "1.08rem",
+          }}
+        >
+          {title}
+        </div>
+        <div style={{ color: "#64748B", fontSize: "1.02rem", lineHeight: 1.45 }}>
+          {subtitle}
+        </div>
       </div>
-      <button
-        onClick={onClick}
-        style={{
-          backgroundColor: "#009EFF",
-          color: "white",
-          border: "none",
-          borderRadius: 10,
-          padding: "10px 12px",
-          fontWeight: 600,
-          cursor: "pointer",
-          whiteSpace: "nowrap",
-          transition: "background-color .2s ease",
-        }}
-        onMouseOver={(e) =>
-          (e.currentTarget.style.backgroundColor = "#0080CC")
-        }
-        onMouseOut={(e) =>
-          (e.currentTarget.style.backgroundColor = "#009EFF")
-        }
-      >
-        {cta}
-      </button>
     </div>
   );
 }
 
-function VideoTile() {
+function CategoryCard({ label, example, icon }) {
   return (
     <div
       style={{
-        background: "#FFFFFF",
-        border: "1px solid #EDF2F7",
-        borderRadius: 14,
-        overflow: "hidden",
-        transition:
-          "box-shadow .2s ease, transform .06s ease, border-color .2s ease",
+        background: "#FBFDFF",
+        border: "1px solid #E2EFFB",
+        borderRadius: 16,
+        padding: 16,
+        display: "flex",
+        alignItems: "flex-start",
+        gap: 12,
       }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.boxShadow = "0 6px 24px rgba(20,40,70,0.06)";
-        e.currentTarget.style.borderColor = "#E3EBF5";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.boxShadow = "none";
-        e.currentTarget.style.borderColor = "#EDF2F7";
-      }}
-      onMouseDown={(e) => (e.currentTarget.style.transform = "scale(0.997)")}
-      onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
     >
-      {/* Video Thumbnail Placeholder */}
       <div
         style={{
-          height: 132,
-          background:
-            "linear-gradient(135deg, rgba(0,158,255,0.10), rgba(0,76,153,0.10))",
+          width: 44,
+          height: 44,
+          borderRadius: 14,
+          background: "#EEF7FF",
           display: "grid",
           placeItems: "center",
-          color: "#0E5AA7",
-          fontWeight: 700,
-          letterSpacing: ".3px",
+          fontSize: 18,
         }}
+        aria-hidden
       >
-        Video
+        {icon}
       </div>
-
-      {/* Video Info */}
-      <div style={{ padding: 14 }}>
-        <div
-          style={{
-            fontWeight: 700,
-            marginBottom: 4,
-            fontSize: ".98rem",
-            lineHeight: 1.35,
-            color: "#13243A",
-          }}
-        >
-          COMS 4153 — Lecture 12
+      <div>
+        <div style={{ fontWeight: 900, color: "#13243A", fontSize: "1.02rem" }}>
+          {label}
         </div>
-        <div style={{ color: "#5B6B82", fontSize: ".9rem" }}>
-          Prof. Ferguson • 42 min
+        <div style={{ color: "#5A6A84", fontSize: "1rem", marginTop: 4 }}>
+          {example}
         </div>
       </div>
     </div>
