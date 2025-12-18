@@ -519,7 +519,7 @@ function VideoCard({ video }) {
       </div>
 
       <div style={{ fontSize: ".85rem", color: "#6B7280", marginTop: 6 }}>
-        Uploaded: {new Date(video.uploaded_at).toLocaleDateString()}
+        Uploaded: {new Date(video.created_at).toLocaleDateString()}
       </div>
 
       <button
